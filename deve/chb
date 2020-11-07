@@ -1,0 +1,34 @@
+#!/usr/bin/perl -w
+=head1 Name
+    changbashrc.pl
+Info
+    Version V
+    Author: st_agric (FuYuan), fuyuan@genomics.cn
+    Created Time: 2017-07-27 11:17:03
+    Created Version: changbashrc.pl
+Usage
+    changbashrc.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($help);
+GetOptions(
+	"help!"=>\$help
+);
+die opth() if $help;
+
+my $tmp=$1.$2 if `date`=~/(\w+)\s+(\d+)/;
+my $name=$1 if `whoami`=~/(\S+)/;
+chdir "/home/$name";
+mkdir $tmp;
+`mv .bash* $tmp 2>/dev/null`;
+`cp /SHARE/HOME/.bashrc .`;
+`cp /SHARE/HOME/.bash_profile .` if ! -f ".bash_profile";
+`cp /SHARE/HOME/.dir_colors .` if ! -f ".dir_colors";
+`cp /SHARE/HOME/.vimrc .` if ! -f ".vimrc";
+##############################################
+######## Sub Routines ##### Good Luck ########
+##############################################
+

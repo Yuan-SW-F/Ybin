@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+=head1 Name
+    annotation/Genemark.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2016-12-13 15:48:53
+    Created Version: Genemark.pl
+Usage
+    Genemark.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCpath;
+use MCsub;
+use Getopt::Long;
+my ($help);
+GetOptions(
+	"help!"=>\$help
+);
+die opth() if $help;
+
+mkdir "Genemark";
+my $fasta=shift;
+$fasta= fasta($fasta);
+`cp .gm_key ~` if ! -f "~/.gm_key";
+output("Genemark/MarkGo.sh","gm_et_linux_64/gmes_petap/gmes_petap.pl --ES --sequence $fasta >log");
+say "cd Genemark;QS 5 MarkGo.sh;cd -;"
+

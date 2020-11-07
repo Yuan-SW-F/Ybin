@@ -1,0 +1,48 @@
+#!/usr/bin/perl -w
+##!/share/app/perl-5.22.0/bin/perl -w
+=head1 FileName
+	eqw.pl	
+Version 
+	Author: Yuan-SW-F, yuanswf@163.com
+	Created Time: Tue 26 Jul 2016 04:20:33 PM CST
+Example eqw.pl	|sh
+=cut
+use strict;
+use FindBin qw($Bin);
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($del,$resub,$help);
+GetOptions(
+	"del!"=>\$del,
+	"resub!"=>\$resub,
+	"help!"=>\$help
+);
+die `pod2text $0` if $help;
+my $lst=`which lst`;
+chomp $lst;
+my ($job,@jobs);
+if ($resub){
+	if (@ARGV>0){
+		@jobs=@ARGV;
+		}else{
+		$job=`qstat|awk \$5/[r,q,w]/|awk '{print \$1}'|$lst`;
+		@jobs=split /\s+/, $job;
+		}
+	}else{
+	$job=`qstat|awk \$5/Eqw/|awk '{print \$1}'|$lst`;
+	@jobs=split /\s+/, $job;
+	}
+my $qdel;
+my $qd=`which qd`;
+chomp $qd;
+for (@jobs){
+	if (/\d+/){
+	my $dir=$1 if `$qd $_`=~/(\S+)/;
+	my $work=$1 if `$qd -j $_`=~/(\S+)/;
+	my $vf=$1 if `$qd -s $_`=~/([0-9,\.]+)/;
+	$qdel="qdel $_;";
+	$qdel.="cd $dir;QS $vf 4 $work;cd -;" if ! $del;
+	say $qdel;
+	}
+}

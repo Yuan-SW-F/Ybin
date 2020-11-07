@@ -1,0 +1,53 @@
+#!/usr/bin/perl -w
+=head1 Name
+    SSPACE_shell.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2016-12-01 16:36:28
+Usage
+    SSPACE_shell.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($list,$aligner,$help,$fasta);
+GetOptions(
+	"fasta:s"=>\$fasta,
+	"list:s"=>\$list,
+	"aligner:s"=>\$aligner,
+	"help!"=>\$help
+);
+$list ||= shift;
+$list ||= -f "assembly.lst" ? "assembly.lst" : "assembly.list";
+#$list||="assembly.list";
+$aligner||="bwa";
+$fasta=fasta($fasta);
+say "SSPACE_Standard_v3.0.pl -l library.txt -s contig.fasta -x 0 -m 32 -o 20 -z 0 [-k 5 -a 0.7 -n 15 -g 0 -T 1 -S -b output -v 0 -p 0]" if $help;
+die opth() if $help;
+
+### build library list ###
+say "aligner: $aligner";
+say "creat library.txt";
+
+my (%hash,$unique,$lib,%i,$i,$sd,$or);
+open IN,"$list"||$!;
+while (<IN>){
+	chomp;
+	/(\S+(L\d\_[^\/\.]+)\_([12])\.\S+)\s+(\d+)/;
+	$hash{$2}=$4;
+	if ($3==2){
+		$i++ if ! exists $i{$4} ;
+		$i{$4}=1;
+		$sd= $4<2000 ? 0.25 : 0.5;
+		$or= $4<2000 ? "FR" : "RF";
+		$lib.="Lib$i $aligner $unique $1 $4 $sd $or\n";
+		}
+	$unique=$1;
+	}
+close IN;
+output("library.txt","$lib");
+
+my $cmd= "export PATH=/usr/bin:\$PATH \n/share/app/SSPACE-STANDARD-3.0/SSPACE_Standard_v3.0.pl -l library.txt -s $fasta -x 0 -m 32 -o 20 -z 0 -k 8 -a 0.7 -n 15 -T 12 -b assembly -p 1";
+output("SSPACE.sh","$cmd");
+

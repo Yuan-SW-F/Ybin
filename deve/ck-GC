@@ -1,0 +1,37 @@
+#!/usr/bin/perl -w
+=head1 Name
+    ck-GC.pl
+Info
+    Version V
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2017-06-27 14:57:50
+    Created Version: ck-GC.pl
+Usage
+    ck-GC.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($help);
+GetOptions(
+	"help!"=>\$help
+);
+die opth() if $help;
+
+open IN,shift||$!;
+my ($seq,$len_t,$len_gc);
+while (<IN>){
+	next if /\>/;
+	chomp;
+	$seq=$_;
+	$seq=~s/[^ATCGatcg]//g;
+	$len_t+= length $seq;
+	$seq=~s/[^GCgc]//g;
+	$len_gc+=length $seq;
+}
+say "$len_gc/$len_t=".$len_gc/$len_t;
+##############################################
+######## Sub Routines ##### Good Luck ########
+##############################################
+

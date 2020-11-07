@@ -1,0 +1,41 @@
+#!/usr/bin/perl -w
+=head1 Name
+    1kp4est.pl
+Info
+	Created Time: 2016-10-17 15:37:17
+	Author: Yuan-SW-F, yuanswf@163.com
+	Created Time: 2016-12-15 11:32:34
+	Created Version: 1kp4est.pl
+Usage
+	1kp4est.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($help);
+GetOptions(
+	"help!"=>\$help
+);
+die opth() if $help;
+
+my (%hash,@lines,$table,$out);
+my $in=join " ",@ARGV;
+if (-f "$in"){
+open IN,shift||$!;
+while (<IN>){
+	$hash{"$1\_$2"}=1 if /^(\w+)[\ \_](\w+)/;
+}
+close IN;
+}else{
+	$hash{"$1\_$2"}=1 if $in=~/^(\w+)[\ \_](\w+)/;
+}
+open IN,"1kp/1kp1422Species.txt"||$!;
+while (<IN>){
+	@lines=split /\t/;
+	$table.="$lines[0]\t$lines[2]\n" if exists $hash{$lines[0]};
+	$out.="ln -s 09_2015/06_1kp/$lines[1]/$lines[1]\_genome.fa\n" if exists $hash{$lines[0]};
+}
+close IN;
+output("table.xls",$table);
+output("link.lst",$out);

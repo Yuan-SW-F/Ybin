@@ -1,0 +1,31 @@
+#! /usr/bin/perl -w
+###Yuan###
+#$gff=ARGV
+for $i(0..$#ARGV){
+`stat_gene_set.pl $ARGV[$i] >./$ARGV[$i].xls`;
+$name{$i}=$ARGV[$i];
+($name{$i}=$1)  if ($name{$i}=~(/^(\w+)\S+\.solar\.genewise\.gff/)) ;
+($name{$i}=$1) if ($name{$i}=~(/\.(\w+)\.gff\.check\.gff/));
+$name{$i}=$1 if $name{$i}=~/^(\w+)/;
+$name{$i}=$1.'.'.$2 if $name{$i}=~/^(\w)[^\_]+\_([^\_]+)/;
+print $name{$i}."\n";
+open IN,"./$ARGV[$i].xls";
+while (<IN>){
+($gene_number{$i}=$1) if ($_=~/gene_number\:\s+(\S+)/);
+($average_gene_len{$i}=$1) if (<IN>=~/average_gene_len\:\s+(\S+)/);
+($average_cds_len{$i}=$1) if (<IN>=~/average_cds_len\:\s+(\S+)/);
+($average_exon_number{$i}=$1) if (<IN>=~/average_exon_number\:\s+(\S+)/);
+($average_exon_len{$i}=$1) if (<IN>=~/average_exon_len\:\s+(\S+)/);
+($average_intron_len{$i}=$1) if (<IN>=~/average_intron_len\:\s+(\S+)/);
+}
+close IN;
+}
+open OUT,">./statistics.gff.xls";
+print OUT "GFF_name\tGENE_No.\tAVG_genelen\tAVG_cdslen\tAVG_exonNo.\tAVG_exonlen\tAVG_intronlen\n";
+#print OUT "gff_name\tgene_number\taverage_gene_len\taverage_cds_len\taverage_exon_number\taverage_exon_len\taverage_intron_len\n";
+#while ($i=0,$i<$#ARGV){
+for $j(0..$#ARGV){
+print OUT "$name{$j}\t$gene_number{$j}\t$average_gene_len{$j}\t$average_cds_len{$j}\t$average_exon_number{$j}\t$average_exon_len{$j}\t$average_intron_len{$j}\n";
+#$i++;
+}
+close OUT;

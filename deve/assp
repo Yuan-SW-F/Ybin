@@ -1,0 +1,47 @@
+#!/share/app/perl-5.22.0/bin/perl -w
+=head1 Name
+    SparseAssebmler_shell.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2016-11-10 15:12:49
+Usage
+    SparseAssebmler_shell.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($species,$list,$gsize,$kmer,$skipk,$help);
+GetOptions(
+	"species:s"=>\$species,
+	"list:s"=>\$list,
+	"gsize:s"=>\$gsize,
+	"kmer:i"=>\$kmer,
+	"skipk:i"=>\$skipk,
+	"help!"=>\$help
+);
+$list ||= shift;
+$list ||= -f "assembly.lst" ? "assembly.lst" : "assembly.list";
+say "please INPUT ASSEMBLY <seq&lib> LIST !" if ! -f $list;
+$gsize=~s/[Mm]/000000/ if $gsize;
+$gsize=~s/[Gg]/000000000/ if $gsize;
+$gsize= $gsize ? "GS $gsize" : "500000000" && say "please give the genome size !";
+$kmer||="73";
+$skipk||="10";
+$species||= `pwd`=~/\/[^A-Z]+([A-Z][^\/]+)\/[^\/]*asse/ ? $1 : "";
+die opth() if $help;
+
+open IN,$list||$!;
+my $contig;
+while (<IN>){
+	/((\S+)\_([12])\.\S+)\s+(\d+)/;
+	next if $4>=2000;
+	$contig.=" f $1";
+#	$contig.=" i1 $1" if $3==1;
+#	$contig.=" i2 $1" if $3==2;
+	}
+	my $i=0;
+	$i=$1+1 if `ls |grep SPARSE_V 2>/dev/null`=~/SPARSE_V(\d+)/;
+	my $dir= `pwd`!~/SPARSE_V[^\/]+$/ ? "SPARSE_V$i/" : ".";
+	mkdir $dir if $dir=~/SPARSE/;
+output("$dir/SPARSE$species.sh","SparseAssebmler g $skipk k $kmer LD 0 $gsize NodeCovTh 2 EdgeCovTh 1 $contig"); 

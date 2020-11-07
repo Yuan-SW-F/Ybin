@@ -1,0 +1,46 @@
+#!/usr/bin/perl -w
+=head1 Name
+    new_check/perl.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2016-12-07 11:09:42
+Usage
+    perl.pl	
+=cut
+use strict;
+use feature qw(say);
+use lib '/home/st_agric/lib';
+use MCsub;
+use Getopt::Long;
+my ($help);
+GetOptions(
+	"help!"=>\$help
+);
+die opth() if $help;
+
+my ($i,$s,$cmd);
+my $pwd=$1 if  `pwd`=~/(\S+)/;
+open IN,"new.fa"||$!;
+my $sh=$1 if `ls mk*.sh`=~/(\S+)/;
+while (<IN>){
+	$i=$1 if /\>?(\w+)/;
+	$/="\>";
+	$s=<IN>;
+	chop $s;
+	$/="\n";
+	if (length($s)> 10000){
+	mkdir $i;
+	output("$i/$i.fa",">$i\n$s");
+	`cp maker_bopts.ctl maker_exe.ctl $sh $i`;
+	open I,"maker_opts.ctl"||$!;
+	open O,"> $i/maker_opts.ctl"||$!;
+	while (<I>){
+		s/^genome\=\S+/genome\=$pwd\/$i\/$i.fa/;
+		print O $_;
+		}
+	close I;
+	$cmd.= "cd $i ;mv $sh new_$sh; QS 5 new_$sh; cd -;\n";
+	}
+	}
+close IN;
+output("shell.shell","$cmd");

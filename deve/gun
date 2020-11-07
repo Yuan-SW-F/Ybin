@@ -1,0 +1,27 @@
+#!/share/app/perl-5.22.0/bin/perl -w
+=head1 Name
+    /lit_program/gunzip.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2016-08-24 11:17:48
+Usage
+    gunzip.pl	
+=cut
+use strict;
+use feature qw(say);
+use lib '$PIP/lib';
+use MCsub;
+use Getopt::Long;
+my ($source,$help);
+GetOptions(
+	"source:s"=>\$source,
+	"help!"=>\$help
+);
+$source||="vf=5G";
+$source="vf=$1"."G" if $source=~/([0-9,\.]+)/;
+die opth() if $help;
+my $gun=gun(@ARGV);
+$gun||="";
+output("gun.shell",$gun) if $gun;
+my $path= path("qsub");
+`echo "nohup $path --jobprefix gunzip --resource $source gun.shell &" > gunzip.sh`
