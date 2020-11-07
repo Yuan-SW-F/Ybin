@@ -1,47 +1,46 @@
 ###pipline-1.2.0
-pipline-1.2.0=/hwfssz5/ST_AGRIC/share/pipline/pipline-1.2.0
-#/hwfssz5/ST_AGRIC/share/pipline/pipline-1.2.0/script/config.txt
+pipline-1.2.0=/pipline/pipline-1.2.0
+#/pipline/pipline-1.2.0/script/config.txt
 
 ###path of script
 
 
 ##MC_pipeline
-mc = /hwfssz1/ST_AGRIC/LOCAL/Pipline/PL-program_1
-Perl-pipline.1.0 = /hwfssz1/ST_AGRIC/LOCAL/Pipline/Perl-pipline.1.0
+mc = 
+Perl-pipline.1.0 = Pipline/Perl-pipline.1.0
 
 ##program
-s21	= /hwfssz1/ST_AGRIC/LOCAL/Pipline/PL-program/alias/s21
-qsub = /hwfssz5/ST_AGRIC/share/pipline/pipline-1.2.0/bin/qsub-sge.pl
-#qsub = /hwfssz1/ST_AGRIC/LOCAL/Pipline/PL-program/job/qsub-sge.pl
-#autoccg = /opt/lustresz/DAS_NFS/share_backup/backup/xuxiangyang/soft/Annotation_pipeline_2.0/05.RNAseq_annlysis/bin/auto_CCG.pl
+s21	= 
+qsub = 
+
+
 ###gene annotation by stringtie
-length_filter = /lfs1/backup/F13ZHQYJSY1409/heshixu/Program/myscript/length_filter.pl
+length_filter = 
 ##filter
-soapfilter = /ifs4/BC_PUB/biosoft/pipe/bc_ba/Assembly_v2/Filter_data/SOAPfilter_v2.2/SOAPfilter_v2.2
-fastqc = /share/app/FastQC-0.11.3/fastqc
+soapfilter = SOAPfilter_v2.2/SOAPfilter_v2.2
+fastqc = FastQC-0.11.3/fastqc
 ###kmer
-kmerfreq = /hwfssz1/ST_AGRIC/LOCAL/Pipline/PL-program_1/software/kmerfreq_v5.0/kmerfreq
-kmergenie = /hwfssz1/ST_AGRIC/LOCAL/Pipline/PL-program_1/software/kmergenie-1.7044/kmergenie
-gce_path = /hwfssz1/ST_AGRIC/LOCAL/Pipline/PL-program_1/software/gce-1.0.0
+kmerfreq = /software/kmerfreq_v5.0/kmerfreq
+kmergenie = /software/kmergenie-1.7044/kmergenie
+gce_path = /software/gce-1.0.0
 ##assembly
 ###RNA
 trnt = /share/app/trinityrnaseq-2.0.6
-java18 = /hwfssz1/ST_AGRIC/F13ZHQYJSY1409_ME/USER/lilinzhou/APP/ENVIRONMENT/jre1.8.0_141/bin/java
-picard = /hwfssz1/ST_AGRIC/F13ZHQYJSY1409_ME/USER/lilinzhou/APP/Software/picard/picard-tools-2.2.4/picard.jar
-gatk = /hwfssz1/ST_AGRIC/F13ZHQYJSY1409_ME/USER/lilinzhou/APP/Software/GATK/GenomeAnalysisTK-3.5/GenomeAnalysisTK.jar
-#/hwfssz1/ST_AGRIC/LOCAL/Software/APP/GenomeAnalysisTK-3.8/GenomeAnalysisTK.jar
-#/share/app/GenomeAnalysisTK-3.4/GenomeAnalysisTK.jar
-java16 = /hwfssz1/ST_AGRIC/LOCAL/Program/app/jdk1.6.0_45
-#/ifs1/ST_PLANT/USER/liyuxiang/common_bin/software/trinityrnaseq_r2012-10-05
-annotate = /hwfssz1/ST_AGRIC/LOCAL/Pipline/DNA/DNA_annotation/Annotation_2016a
-cds2aa = /hwfssz1/ST_AGRIC/LOCAL/Pipline/DNA/DNA_annotation/Annotation_2016a/bin/common_bin/cds2aa.pl
-aug = /hwfssz1/ST_AGRIC/LOCAL/Software/APP/augustus-3.2.3
-maker_path = /hwfssz1/ST_AGRIC/USER/changyue/Program/Annotation/gene_annotation/maker/bin
-#annotate = /hwfssz1/ST_AGRIC/LOCAL/Pipline/Annotation_2016a
+java18 = jre1.8.0_141/bin/java
+picard = picard-tools-2.2.4/picard.jar
+gatk = GenomeAnalysisTK-3.5/GenomeAnalysisTK.jar
+
+java16 = jdk1.6.0_45
+
+annotate = Annotation_2016a
+cds2aa = common_bin/cds2aa.pl
+aug = augustus-3.2.3
+maker_path = gene_annotation/maker/bin
+
 #
 #dirctory
 #
 #database
-ntdb = /hwfssz1/ST_AGRIC/LOCAL/Database/blast/database
-nbdb = /hwfssz1/ST_AGRIC/LOCAL/Database/IBC-3496bac/database
-taxdb = /hwfssz1/ST_AGRIC/LOCAL/Database/taxdb/database
+ntdb = /Database/blast/database
+nbdb = /Database/IBC-3496bac/database
+taxdb = /Database/taxdb/database
