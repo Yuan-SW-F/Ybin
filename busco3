@@ -1,0 +1,62 @@
+#!/usr/bin/perl -w
+=head1 Name
+    evalute/BUSCO3.pl
+Info
+    Version V
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2017-07-13 15:12:15
+    Created Version: BUSCO3.pl
+Usage
+    BUSCO3.pl	
+	--mode      [String] [geno] | tran | prot
+	--lineage   [String] [embryophyta] | eukaryota | bacteria | metazoa | vertebrata
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($fasta,$mode,$out,$lineage,$species,$help);
+GetOptions(
+	"fasta:s"=>\$fasta,
+	"mode:s"=>\$mode,
+	"out:s"=>\$out,
+	"lineage:s"=>\$lineage,
+	"species:s"=>\$species,
+	"help!"=>\$help
+);
+
+$fasta||=shift;
+$fasta= fasta($fasta);
+$mode||="geno"  if $fasta=~/a$/;
+$mode||="prot" if $fasta=~/pep$/;
+$mode||="tran" if $fasta=~/cds$/;
+$mode="geno" if $mode=~/^g/;
+$mode="tran" if $mode=~/^t/;
+$mode="prot" if $mode=~/^p/;
+$mode ||="geno";
+$species ||= $fasta=~/\/(\w+)[^\/]+$/ ? $1 : "species";
+my $lineage_path= "";
+my $software_path= "";
+$lineage ||= "embryophyta_odb9";
+$lineage = "$lineage_path/embryophyta_odb9" if $lineage =~/^em/ || $lineage =~/^p/;
+$lineage = "$lineage_path/eukaryota_odb9" if $lineage =~/^eu/;
+$lineage = "$lineage_path/bacteria_odb9" if $lineage =~/^b/;
+$lineage = "$lineage_path/metazoa_odb9" if $lineage =~/^m/;
+$lineage = "$lineage_path/vertebrata_odb9" if $lineage =~/^v/;
+$lineage ||="$lineage_path/$1_odb9" if $lineage =~/([a-z]+)/;
+die `ls $lineage_path |grep odb9 |perl -ne 'chomp;print "\$_ " if -d "$lineage_path/\$_"'` if ! -e $lineage;
+$out||="bus_$species\_$mode";
+my $time=$1.$2 if `date`=~/\s+(\S+\s+\d+\s+\d+)\:(\d+)/;
+$time=~s/\s//g;
+$out.="\_$time";
+my $suffix=$1 if $lineage=~/\/(\w+)\_\w+$/;
+die opth() if $help;
+
+`echo 'export PATH=/share/app/python-2.7.10/bin:\$PATH' > busco.sh`;
+`echo 'export PYTHONPATH=/share/app/python-2.7.10/lib/python2.7/site-packages:\$PYTHONPATH' >> busco.sh`;
+`echo 'export PATH="/share/app/EMBOSS-6.5.7/bin:\$PATH"' >> busco.sh`;
+`echo 'export PATH=augustus-3.3.1/bin:augustus-3.3.1/scripts:\$PATH' >> busco.sh`;
+`echo 'export AUGUSTUS_CONFIG_PATH=augustus-3.3.1/config' >> busco.sh`;
+
+`echo 'export PATH=/app/Python-2.7.13/bin:\$PATH' >> busco.sh`;
+`echo 'python $software_path -i $fasta -o $out\_$suffix -l $lineage -m $mode -c 30 -f ' >> busco.sh`;

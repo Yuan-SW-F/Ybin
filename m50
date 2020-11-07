@@ -1,0 +1,69 @@
+#!/share/app/perl-5.22.0/bin/perl -w
+=head1 FileName
+    m50.pl
+Version
+	Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: Thu 21 Jul 2016 11:04:55 AM CST
+Example m50.pl  *n50
+=cut
+use strict;
+use FindBin qw($Bin);
+use Getopt::Long;
+my ($help);
+GetOptions(
+    "help!"=>\$help
+	);
+die `pod2text $0` if $help||@ARGV < 1;
+
+my (%h,%s,$filename,$filehead,$head,$M_len,$N90,$N80,$N70,$N60,$N50,$N40,$N30,$N20,$N10,$T_len,$num_100,$in,$num_2000);
+for (@ARGV){
+	if (/^(\w+)\.(\S+)/){
+	$h{$1}=$2;
+	$s{$2}=$1;
+	}
+}
+
+for (@ARGV){
+	if (/(\w+).(\S+)/){
+		if (keys %h == 1 && keys %s == @ARGV){
+		$filename=$1;
+		$filehead=$2;
+		}elsif($1=~/((\w+)\_([^\_]+))$/){
+		    $filename=$2;
+			$filehead=$3.$h{$1};
+			}
+		}else{
+		$filename="all";
+		$filehead=$_;
+		}
+		$filehead=~s/\.n50//;
+		$filehead=~s/\.fa//;
+open IN,"$_"||$!;
+my $rate="";
+while (<IN>){
+$filehead=$_ if /c/;
+chomp $filehead;
+if ($_=~/max_length\:\s+(.+)/ || $_=~/Max_len\s+(.+)/){
+$M_len.="\t$1\t";
+($N90.="\t$1\t$2") if (<IN>=~/^N90\s+(\d+)\s+(.+)/);
+($N80.="\t$1\t$2") if (<IN>=~/^N80\s+(\d+)\s+(.+)/);
+($N70.="\t$1\t$2") if (<IN>=~/^N70\s+(\d+)\s+(.+)/);
+($N60.="\t$1\t$2") if (<IN>=~/^N60\s+(\d+)\s+(.+)/);
+($N50.="\t$1\t$2") if (<IN>=~/^N50\s+(\d+)\s+(.+)/);
+($N40.="\t$1\t$2") if (<IN>=~/^N40\s+(\d+)\s+(.+)/);
+($N30.="\t$1\t$2") if (<IN>=~/^N30\s+(\d+)\s+(.+)/);
+($N20.="\t$1\t$2") if (<IN>=~/^N20\s+(\d+)\s+(.+)/);
+($N10.="\t$1\t$2") if (<IN>=~/^N10\s+(\d+)\s+(.+)/);
+($T_len.="\t$1\t") if (<IN>=~/^Total\slength\:?\s+(.+)/);
+($num_100.="\t$1\t") if (<IN>=~/100bp\s+(.+)/);
+$in=<IN>;
+($num_2000.="\t$1\t") if ($in=~/2000bp\s+(.+)/ || $in=~/2kb\s+(.+)/);
+$rate.=<IN>;
+}
+}
+$head.="\t$filehead";
+close IN;
+
+open OUT,">./$filename.n50"||$!;
+print OUT "$filename$head\nM_len$M_len\nN90$N90\nN80$N80\nN70$N70\nN60$N60\nN50$N50\nN40$N40\nN30$N30\nN20$N20\nN10$N10\nT_len$T_len\nnum>=100bp$num_100\nnum>=2000bp$num_2000\n$rate";
+}

@@ -1,0 +1,30 @@
+#!/share/app/perl-5.22.0/bin/perl -w
+=head1 FileName
+	chd.pl	
+Version 
+	Author: Yuan-SW-F, yuanswf@163.com
+	Created Time: Thu 11 Aug 2016 03:01:06 PM CST
+Example chd.pl	
+=cut
+use strict;
+use MCsub;
+use Getopt::Long;
+my ($check,$delete,$help);
+GetOptions(
+	"check!"=>\$check,
+	"delete!"=>\$delete,
+	"help!"=>\$help
+);
+die `pod2text $0` if $help;
+my $dir= dir();
+my $nm=shift||$1 if $dir=~/([^\/]+)$/;
+if ($check){
+	if (`less ~/.bash_profile` =~/alias \S+\=\'cd $dir\'/){
+	`sed /"$dir"\'/d ~/.bash_profile > ~/.bash_profile_tem`;
+	`cp ~/.bash_profile_tem ~/.bash_profile`;
+	}
+}
+my $del=1 if `less ~/.bash_profile` =~/alias $nm\=\'cd \'/ || $delete;
+`sed '/$nm\=/'d ~/.bash_profile > ~/.bash_profile_tem` if $del;
+`cp ~/.bash_profile_tem ~/.bash_profile` if $del;
+`echo "alias $nm\=\'cd $dir\'" >> ~/.bash_profile` if `less ~/.bash_profile` !~/alias $nm\=\'cd $dir\'/ && ! $delete;

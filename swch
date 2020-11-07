@@ -1,0 +1,92 @@
+#!/usr/bin/perl -w
+=head1 Name
+    survey/switch_sequence_data.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2016-12-14 16:01:37
+    Created Version: switch_sequence_data.pl
+Usage
+    switch_sequence_data.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($lane,$lib,$insert,$cfg,$assembly,$map,$filter,$output,$swch,$help);
+GetOptions(
+	"swch!"=>\$swch,
+	"lane:s"=>\$lane,
+	"lib:s"=>\$lib,
+	"insert:i"=>\$insert,
+	"cfg!"=>\$cfg,
+	"assembly!"=>\$assembly,
+	"map!"=>\$map,
+	"filter!"=>\$filter,
+	"output:s"=>\$output,
+	"help!"=>\$help
+);
+my $in=shift;
+$lane||="lane.lst";
+$lib||="lib.lst";
+$insert||=1 if  $swch;
+$insert||=200;
+$in||="lane.lst" if -f "lane.lst";
+$output="assembly.lst" if $assembly;
+$output="map.lst" if $map;
+$output="filter.lst" if $filter;
+$output||="assembly.lst";
+$assembly=1 if $cfg;
+$in||="assembly.lst" if -f "assembly.lst";
+$in="assembly.lst_bf" if $in eq "assembly.lst";
+`mv assembly.lst assembly.lst_bf` if -f "assembly.lst";
+
+die opth() if $help;
+
+if (`less $in`=~/\[/){
+	open OUT,">assembly.lst";
+	open IN,$in||$!;
+	while (<IN>){
+		$insert=$1 if /avg_ins\=(\d+)/;
+		print OUT "$1\t$insert\n" if /q\d?\=(\/\S+)/;
+		}
+	close OUT;
+	close IN;
+	$in="assembly.lst";
+	}
+
+my %ist= inhash($lib) if -f $lib;
+my (%lib,$seq,%chk,$libnm,%seq,%fix);
+if (`less $in`!~/\[/){
+	open IN,"$in"||$!;
+	while (<IN>){
+		/^(\S+)/;
+		next if exists $chk{$1};
+		$seq=$1;
+		$chk{$1}=1;
+		$libnm= $seq=~/([^\/]+)$/ ? $1=~/(L\d\_(\w+\-\S+))\_(\d)/ || $1=~/((\S+))\_(\d)/ ? $2 : "null" : "null";
+		$ist{$libnm}= !exists $ist{$libnm} ? /^(\S+)\s+(\d+)/ ? $2 : $insert : $ist{$libnm};
+		$seq=$1 if $seq=~/(\S+)\_[12](\.\S+)/;
+		$fix{$seq}=$2;
+		$lib{$seq}=$libnm;
+		$seq{$seq}=$ist{$libnm} if $ist{$libnm}>1;
+		}
+	}
+my (%out,$outseq,$outist,%fast,$outcfg,$n,$m,%ckrank);
+for (sort {$seq{$a} <=> $seq{$b}} keys %seq){
+	$out{$lib{$_}}.="$_\_1$fix{$_}\t$seq{$_}\n$_\_2$fix{$_}\t$seq{$_}\n";
+	$fast{$lib{$_}}.=  "q1=$_\_1$fix{$_}\nq2=$_\_2$fix{$_}\n" ;
+	}
+for (sort {$ist{$a} <=> $ist{$b}} keys %ist){
+	$outist.="$_\t$ist{$_}\n";
+	$n=1 if $ist{$_}<2000;
+	$m++ if $ist{$_}>=2000 && ! exists $ckrank{$ist{$_}};
+	$ckrank{$ist{$_}}=1;
+	$n=1+$m if $ist{$_}>=2000;
+	if ($cfg){$outcfg.= $ist{$_}<2000 ? "[LIB]\nname=$_\navg_ins=$ist{$_}\nreverse_seq=0\nasm_flags=3\nrank=$n\npair_num_cutoff=3\nmap_len=32\n$fast{$_}\n" : "[LIB]\nname=$_\navg_ins=$ist{$_}\nreverse_seq=1\nasm_flags=2\nrank=$n\npair_num_cutoff=5\nmap_len=35\n$fast{$_}\n" ;}
+	$outseq.=$out{$_} if exists $out{$_};
+	}
+output("$output","$outseq");
+output("lib.lst","$outist") if $filter;
+`less $output|awk '{print \$1}' > lane.lst` if $filter && ! -f "lane.lst";
+output("lib.cfg",$outcfg) if $cfg;
+`mv assembly.lst_bf assembly.lst` if ! -f "assembly.lst" && -f "assembly.lst_bf";

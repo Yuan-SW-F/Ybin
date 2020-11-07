@@ -1,0 +1,102 @@
+#!/usr/bin/perl -w
+=head1 Name
+    cn50.pl
+Info
+    Version V
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2017-06-26 09:19:18
+    Created Version: cn50.pl
+	lit_program/cn50.pl
+	Created Time: 2016-08-17 11:19:28
+Usage
+    cn50.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($g,$Ns,$cut_off,$check,$help);
+GetOptions(
+	"Ns:s"=>\$Ns,
+	"g:i"=>\$g,
+	"cutoff:i"=>\$cut_off,
+	"check!"=>\$check,
+	"help!"=>\$help
+);
+$cut_off||=100;
+$Ns||="N";
+die opth() if $help;
+
+my (@m,%n,@l_100,@l_2k,$Nrate,$t_c,$t_s);
+my $out;
+for my $f(@ARGV){
+	n50($f);
+	$out="3.3 Summarized by N50\n\n";
+	$out.=" \tScaffold\t \tContig\n";
+	$out.=" \tLength (bp)\tNumber\tLength (bp)\tNumber\n";
+	$out.="Maximal length (bp)\t". (join "\t\t",@m) ."\n";
+	for (sort {$b <=> $a} keys %n){
+		$out.="N$_\t$n{$_}"."\n";
+	}
+	$out.="Total length (bp)\t$t_s\t\t$t_c\n";
+	$out.="number>=100bp\t\t". (join "\t\t",@l_100). "\n";
+	$out.="number>=2kb\t\t". (join "\t\t",@l_2k). "\n";
+	$out.="Ratio of $Ns"."s\t".sprintf "%.2f%%\n",$Nrate;
+	output("$f.$Ns.n50",$out);
+}
+
+##############################################
+######## Sub Routines ##### Good Luck ########
+##############################################
+sub n50
+{
+	my ($len_n,$cmd,$seq,$id,$len_seq,$len_sub,@ctg,@stg);
+	open IN,shift ||$!;
+	while (<IN>){
+		$id=$1 if /\>?(\S+)/;
+		$/="\>";
+		$seq=<IN>;
+		$/="\n";
+		$seq=~s/[\s\>]//g;
+		$len_seq=length $seq;
+		next if $len_seq < $cut_off;
+		$t_s+=$len_seq;
+		push @stg,$len_seq;
+		my @sub_ctg=split /$Ns+/,$seq;
+		for (@sub_ctg){
+			$len_sub=length $_;
+			$len_n+=$len_sub;
+			next if $len_sub < $cut_off;
+			$t_c+=$len_sub;
+			push @ctg,$len_sub;
+		}
+	}
+	$t_s=$g if $g;
+	$Nrate=($t_s-$len_n)/$t_s*100;
+#	$t_s=$g if $g;
+	count($t_s,@stg);
+	count($t_c,@ctg);
+}
+sub count
+{
+	my ($len,$l_100,$l_1k,$l_2k,$l_5k);
+	$l_100=$l_2k=0;
+	my $tt=shift;
+	my @arr=sort {$b>$a} @_;
+	push @m,$arr[0];
+	my $j=10;
+	my $i;
+	for (sort {$b <=> $a} @_){
+		$len+=$_;
+		$i++;
+		$l_100++ if $_>=100;
+		$l_2k++ if $_ >=2000;
+		while ($len/$tt>=$j/100){
+			$n{$j}.="$_\t$i\t";
+			$j+=10;
+			$j++ if $j==100;
+		}
+	}
+	push @l_100,$l_100;
+	push @l_2k,$l_2k;
+}

@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+=head1 Name
+    /proof_support/proof.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2017-01-18 17:25:39
+    Created Version: proof.pl
+Usage
+    proof.pl	
+=cut
+use strict;
+use feature qw(say);
+use Getopt::Long;
+my ($help);
+GetOptions(
+	"help!"=>\$help
+);
+die opth() if $help;
+
+my $f=shift;
+$f=~/([^\/]+)$/;
+open O1,">$1.p.list";
+open O2,">$1.h.list";
+open O3,">$1.c.list";
+open O4,">$1.ph.list";
+open O5,">$1.hc.list";
+open O6,">$1.pc.list";
+open O7,">$1.phc.list";
+open IN,$f;
+<IN>;
+my ($p,$h,$c,$id,@l);
+while (<IN>){
+	@l=split;
+	$id=$l[0];
+	$p=$l[1];
+	$h=$l[2];
+	$c=$l[3];
+	print O1 $_ if $p >0 && $h==0 && $c==0;
+	print O2 $_ if $p==0 && $h >0 && $c==0;
+	print O3 $_ if $p==0 && $h==0 && $c>0;
+	print O4 $_ if $p >0 && $h >0 && $c==0;
+	print O5 $_ if $p==0 && $h >0 && $c >0;
+	print O6 $_ if $p >0 && $h==0 && $c >0;
+	print O7 $_ if $p >0 && $h >0 && $c >0;
+}

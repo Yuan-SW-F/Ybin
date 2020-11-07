@@ -1,0 +1,63 @@
+#!/usr/bin/perl -w
+=head1 Name
+    same21.pl
+Info
+    Author: Yuan-SW-F, yuanswf@163.com
+    Created Time: 2016-10-17 12:39:06
+Usage
+    same21.pl	
+=cut
+use strict;
+use feature qw(say);
+use MCsub;
+use Getopt::Long;
+my ($num,$help);
+GetOptions(
+	"num|n!"=>\$num,
+	"help!"=>\$help
+);
+die opth() if $help;
+
+my (%hash,$argv,$file,$line,$n,@arry);
+if (@ARGV > 0 && -e $ARGV[0]){
+	$file=$ARGV[0];
+	$argv= @ARGV>0 ? join "\t", @ARGV[1..$#ARGV] : "1";
+	$line= $argv=~/(\d+)/ ? $1 : 1 ;
+	$n= $argv=~/n/ ? 1 : 0;
+	open IN,"$file"||$!;
+		while (<IN>){
+		chomp,
+		my @lines=split /\t/;
+		my $name=$lines[$line-1];
+			push @arry,$name if ! exists $hash{$name};
+			if ($n==1){
+			$hash{$name}+=$lines[-1];
+			}else{
+			$hash{$name}++;
+			}
+		}
+}else{
+$argv= @ARGV>0 ? join "\t", @ARGV[0..$#ARGV] : "1";
+$line= $argv=~/(\d+)/ ? $1 : 1;
+$n= $argv=~/n/ ? 1 : 0;
+	while (<STDIN>){
+	chomp,
+	my @lines=split /\t/;
+	my $name=$lines[$line-1];
+	push @arry,$name if ! exists $hash{$name};
+	if ($n==1){
+	$hash{$name}+=$lines[-1];
+	}else{
+	$hash{$name}++;
+	}
+	}
+}
+if ($num){
+	for (sort {$hash{$b} <=> $hash{$a}} keys %hash){
+	say "$_\t$hash{$_}";
+		}
+	}else{
+	for (@arry){
+	say "$_";
+		}
+	}
