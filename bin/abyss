@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+# Author: Yuan-SW-F, yuanswf@163.com
+# Created Time: 2020-11-09 13:21:30
+# Version : Ypip2.0, Python2
+# Example abyss.py command option
+
+from __future__ import print_function
+import sys, os, re
+
+import os.path as op
+import sys
+import logging
+import string
+
+import getopt
+def printusage():
+	print (
+	"""usage: abyss command option
+	abyss fa2phy *.fa > *.phy    # format swich: MSA_fasta to phy
+	abyss phy2fa *.phy > *fa     # format swich: phy to fasta   
+	abyss lst file               # 
+	abyss spgff *.gff            # split total gff file to each choromosome
+	abyss cds4gff *.gff *.cds    # get cds from gff
+	"""
+	)
+
+def main():
+	if len(sys.argv) < 2:
+		sys.exit(printusage())
+	if len(sys.argv) >= 2:
+		if sys.argv[1] == "fa2phy":
+			if len(sys.argv) == 2:
+				print ("abyss fa2phy *.fa > *.phy")
+			else:
+				fa2phy(sys.argv)
+		elif sys.argv[1] == "phy2fa":
+			if len(sys.argv) == 2:
+				print ("abyss phy2fa *.phy > *.fa")
+			else:
+				phy2fa(sys.argv)
+		elif sys.argv[1] == "lst":
+			if len(sys.argv) == 2:
+				print ("please see lst.pl")
+			else:
+				lst(sys.argv)
+		elif sys.argv[1] == "spgff":
+			if len(sys.argv) == 2:
+				print ("spgff *gff")
+			else:
+				spgff(sys.argv)
+		elif sys.argv[1] == "cds4gff":
+			if len(sys.argv) <= 3:
+				print ("abyss cds4gff *.gff *.cds")
+			else:
+				get_cds_from_gff(sys.argv)
+
+def fa2phy(args):
+	"""
+	%prog fa2phy *.fa > *.phy
+	"""
+	fo = open(sys.argv[2])
+	count = 0
+	seq = ""
+	text = ""
+	for line in fo:
+		re_id = re.match('>(\S+)', line)
+		if re_id:
+			id = re_id.group(1)
+			count = count + 1
+			text += "\n" + id + '    '
+			seq = ""
+		else:
+			line = line.strip()
+			text += line
+			seq += line
+	print (str(count) + "    " + str(len(seq)) + text )
+
+def phy2fa(args):
+	"""
+	%prog phy2fa *.phy > *.fa
+	"""
+	fp = open(sys.argv[2])
+	fp.readline()
+	for line in fp:
+		list = line.split()
+		print (">" + list[0])
+		print (list[1])
+
+def lst(args):
+	sys.exit(print ("lst.pl"))
+
+def spgff(args):
+	fp = open(sys.argv[2])
+	dict_chr = {}
+	for line in fp:
+		re_ot = re.match('(\S+)', line)
+		re_head = re.match('#', line)
+		if re_head:
+			continue
+		if re_ot:
+			if not re_ot.group(1) in dict_chr.keys():
+				to = open(re_ot.group(1) + ".gff", 'w+')
+				dict_chr[re_ot.group(1)] = 1
+			else:
+				to = open(re_ot.group(1) + ".gff", 'a')
+			to.writelines(line)
+def get_cds_from_gff(agrs):
+	fp = open(sys.argv[2])
+	re_file = re.match('(\S+).gff', sys.argv[2])
+	fo = open(re_file.group(1) + '.cds', 'w')
+	dict_gene = {}
+	for line in fp:
+		re_gene = re.search('ID=([^;\s]+)', line)
+		if re_gene:
+			dict_gene[re_gene.group(1)] = 1
+	fp.close()
+	fp = open(sys.argv[3])
+	seq_gene = {}
+	for line in fp:
+		re_gene = re.search('\>(\S+)', line)
+		if re_gene:
+			id_gene = re_gene.group(1)
+			seq_gene[id_gene] = line
+		else:
+			seq_gene[id_gene] += line
+	for i in dict_gene.keys():
+		if i in dict_gene.keys():
+			fo.writelines(seq_gene[i])
+
+if __name__ == "__main__":
+	main()
