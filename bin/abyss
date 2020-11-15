@@ -111,9 +111,14 @@ def get_cds_from_gff(agrs):
 	fo = open(re_file.group(1) + '.cds', 'w')
 	dict_gene = {}
 	for line in fp:
-		re_gene = re.search('ID=([^;\s]+)', line)
-		if re_gene:
-			dict_gene[re_gene.group(1)] = 1
+		list = line.split('\t')
+		re_gff = re.match('^\d+$', list[1])
+		if re_gff:
+			dict_gene[list[3]] = 1
+		else:
+			re_gene = re.search('ID=([^;\s]+)', line)
+			if re_gene:
+				dict_gene[re_gene.group(1)] = 1
 	fp.close()
 	fp = open(sys.argv[3])
 	seq_gene = {}
